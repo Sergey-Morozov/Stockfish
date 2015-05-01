@@ -1,7 +1,7 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
-  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
+  Copyright (C) 2008-2014 Marco Costalba, Joona Kiiski, Tord Romstad
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -32,10 +32,9 @@ namespace Pawns {
 
 struct Entry {
 
-  Score pawns_score() const { return score; }
+  Score pawns_value() const { return value; }
   Bitboard pawn_attacks(Color c) const { return pawnAttacks[c]; }
   Bitboard passed_pawns(Color c) const { return passedPawns[c]; }
-  int pawn_span(Color c) const { return pawnSpan[c]; }
 
   int semiopen_file(Color c, File f) const {
     return semiopenFiles[c] & (1 << f);
@@ -43,6 +42,10 @@ struct Entry {
 
   int semiopen_side(Color c, File f, bool leftSide) const {
     return semiopenFiles[c] & (leftSide ? (1 << f) - 1 : ~((1 << (f + 1)) - 1));
+  }
+
+  int pawn_span(Color c) const {
+    return pawnSpan[c];
   }
 
   int pawns_on_same_color_squares(Color c, Square s) const {
@@ -62,11 +65,12 @@ struct Entry {
   Value shelter_storm(const Position& pos, Square ksq);
 
   Key key;
-  Score score;
+  Score value;
   Bitboard passedPawns[COLOR_NB];
   Bitboard pawnAttacks[COLOR_NB];
   Square kingSquares[COLOR_NB];
   Score kingSafety[COLOR_NB];
+  int minKPdistance[COLOR_NB];
   int castlingRights[COLOR_NB];
   int semiopenFiles[COLOR_NB];
   int pawnSpan[COLOR_NB];
@@ -76,7 +80,7 @@ struct Entry {
 typedef HashTable<Entry, 16384> Table;
 
 void init();
-Entry* probe(const Position& pos);
+Entry* probe(const Position& pos, Table& entries);
 
 } // namespace Pawns
 

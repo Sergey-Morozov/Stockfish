@@ -17,31 +17,30 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#ifndef NOTATION_H_INCLUDED
+#define NOTATION_H_INCLUDED
 
-#include "bitboard.h"
-#include "evaluate.h"
-#include "position.h"
-#include "search.h"
-#include "thread.h"
-#include "tt.h"
-#include "ucioption.h"
+#include <string>
 
-int main(int argc, char* argv[]) {
+#include "types.h"
 
-  std::cout << engine_info() << std::endl;
+class Position;
 
-  UCI::init(Options);
-  Bitboards::init();
-  Position::init();
-  Bitbases::init_kpk();
-  Search::init();
-  Eval::init();
-  Pawns::init();
-  Threads.init();
-  TT.resize(Options["Hash"]);
+std::string score_to_uci(Value v, Value alpha = -VALUE_INFINITE, Value beta = VALUE_INFINITE);
+Move move_from_uci(const Position& pos, std::string& str);
+const std::string move_to_uci(Move m, bool chess960);
 
-  UCI::loop(argc, argv);
-
-  Threads.exit();
+inline char to_char(File f, bool tolower = true) {
+  return char(f - FILE_A + (tolower ? 'a' : 'A'));
 }
+
+inline char to_char(Rank r) {
+  return char(r - RANK_1 + '1');
+}
+
+inline const std::string to_string(Square s) {
+  char ch[] = { to_char(file_of(s)), to_char(rank_of(s)), 0 };
+  return ch;
+}
+
+#endif // #ifndef NOTATION_H_INCLUDED
